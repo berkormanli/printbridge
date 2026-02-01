@@ -1,0 +1,13 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "printbridge",
+  "outputfilename": "printbridge",
+  "frontend:install": "npm install --force",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "Berk Ormanlı",
+    "email": "berkormanl@gmail.com"
+  }
+}

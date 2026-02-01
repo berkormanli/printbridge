@@ -1,0 +1,38 @@
+# Wails
+build/bin/
+frontend/dist/
+frontend/wailsjs/
+
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+
+# Go
+go.work
+go.work.sum
+vendor/
+go.sum
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project specific
+build/windows/
+build.log
+config.json
+installer/deps/
+installer/Output/
+installer/build/
+templates/logos/resized_*.bmp
+node_modules/
+frontend/node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
