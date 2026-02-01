@@ -38,13 +38,6 @@ jobs:
           mkdir installer\deps
           mkdir installer\build\windows
 
-      - name: Download Dependencies (libusb)
-        shell: pwsh
-        run: |
-          Invoke-WebRequest -Uri "https://github.com/libusb/libusb/releases/download/v1.0.27/libusb-1.0.27-binaries.7z" -OutFile "libusb.7z"
-          7z x libusb.7z -olibusb
-          copy libusb\libusb-1.0.27-binaries\VS2019\MS64\dll\libusb-1.0.dll installer\deps\
-          
       - name: Download Dependencies (VC Redist)
         shell: pwsh
         run: |
