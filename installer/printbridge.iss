@@ -55,12 +55,8 @@ Source: "build\windows\config.json"; DestDir: "{userappdata}\PrintBridge"; Flags
 Source: "..\templates\logos\*.bmp"; DestDir: "{userappdata}\PrintBridge\templates\logos"; Flags: ignoreversion
 
 ; ============================================================
-; DEPENDENCIES - libusb DLL (REQUIRED for USB printer support)
+; DEPENDENCIES
 ; ============================================================
-; Download libusb from: https://github.com/libusb/libusb/releases
-; Extract and place 'libusb-1.0.dll' in: installer\deps\
-; Use VS2019\MS64\dll\libusb-1.0.dll for 64-bit builds
-Source: "deps\libusb-1.0.dll"; DestDir: "{app}"; Flags: ignoreversion
 
 ; ============================================================
 ; VC++ REDISTRIBUTABLE (Required for CGO binaries)
