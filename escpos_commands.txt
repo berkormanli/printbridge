@@ -4030,5 +4030,4 @@ B dot
 Storage location map Y.3 print data
 Storage location map Y.3 download bitmap
 Programmer Manual
-
-
+"

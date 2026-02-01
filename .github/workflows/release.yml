@@ -76,12 +76,12 @@ jobs:
           copy config.json installer\build\windows\
           copy README.md installer\build\windows\
 
+      - name: Install Inno Setup
+        run: choco install innosetup
+
       - name: Compile Installer (Inno Setup)
-        uses: Minionguyjosh/inno-setup-action@v1.2.2
-        with:
-          path: installer/printbridge.iss
-          # Override version with tag name (remove 'v' prefix)
-          options: /DMyAppVersion="${{ github.ref_name }}"
+        run: |
+          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer/printbridge.iss /DMyAppVersion="${{ github.ref_name }}"
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
