@@ -1,0 +1,94 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    name: Build Windows Installer
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          check-latest: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Create dependency directories
+        run: |
+          mkdir installer\deps
+          mkdir installer\build\windows
+
+      - name: Download Dependencies (libusb)
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/libusb/libusb/releases/download/v1.0.27/libusb-1.0.27-binaries.7z" -OutFile "libusb.7z"
+          7z x libusb.7z -olibusb
+          copy libusb\libusb-1.0.27-binaries\VS2019\MS64\dll\libusb-1.0.dll installer\deps\
+          
+      - name: Download Dependencies (VC Redist)
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vc_redist.x64.exe" -OutFile "installer\deps\vc_redist.x64.exe"
+
+      - name: Build Resources (windres)
+        run: |
+          windres cmd/tray/printbridge-tray.rc -O coff -o cmd/tray/printbridge-tray.syso
+
+      - name: Build Service
+        run: |
+          set CGO_ENABLED=1
+          go build -o printbridge_service.exe ./cmd/server
+          copy printbridge_service.exe installer\build\windows\
+
+      - name: Build Tray App
+        run: |
+          go build -ldflags "-H=windowsgui" -o printbridge-tray.exe ./cmd/tray
+          copy printbridge-tray.exe installer\build\windows\
+
+      - name: Build Wails App
+        run: |
+          wails build
+          copy build\bin\printbridge.exe installer\build\windows\printbridge-gui.exe
+
+      - name: Stage Other Files
+        run: |
+          copy tray\iconwin.ico installer\build\windows\
+          copy config.json installer\build\windows\
+          copy README.md installer\build\windows\
+
+      - name: Compile Installer (Inno Setup)
+        uses: Minionguyjosh/inno-setup-action@v1.2.2
+        with:
+          path: installer/printbridge.iss
+          # Override version with tag name (remove 'v' prefix)
+          options: /DMyAppVersion="${{ github.ref_name }}"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: installer/installer/output/PrintBridge_Setup.exe
+          name: PrintBridge ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
