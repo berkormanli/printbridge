@@ -581,23 +581,76 @@ func installUpdate(info *update.UpdateInfo) {
 	stopService()
 	time.Sleep(500 * time.Millisecond)
 
-	// Launch the installer with silent flag
-	var cmd *exec.Cmd
+	// Launch the installer
 	if runtime.GOOS == "windows" {
-		// Use /SILENT for Inno Setup - runs without user interaction but shows progress
-		// Use /VERYSILENT for completely silent install
-		cmd = exec.Command(installerPath, "/SILENT", "/CLOSEAPPLICATIONS", "/RESTARTAPPLICATIONS")
+		// Use ShellExecuteW with "runas" verb to request admin privileges
+		// This is necessary because Inno Setup needs admin rights to write to Program Files
+		err := shellExecuteRunAs(installerPath, "/SILENT /CLOSEAPPLICATIONS /RESTARTAPPLICATIONS")
+		if err != nil {
+			showNotification("PrintBridge Update Error", fmt.Sprintf("Failed to launch installer: %v", err))
+			mUpdate.SetTitle("Check for Updates")
+			return
+		}
 	} else {
-		cmd = exec.Command(installerPath)
-	}
-
-	if err := cmd.Start(); err != nil {
-		showNotification("PrintBridge Update Error", fmt.Sprintf("Failed to launch installer: %v", err))
-		mUpdate.SetTitle("Check for Updates")
-		return
+		cmd := exec.Command(installerPath)
+		if err := cmd.Start(); err != nil {
+			showNotification("PrintBridge Update Error", fmt.Sprintf("Failed to launch installer: %v", err))
+			mUpdate.SetTitle("Check for Updates")
+			return
+		}
 	}
 
 	// Exit the tray app to allow update
 	systray.Quit()
+}
+
+// shellExecuteRunAs launches a program with admin privileges using ShellExecuteW
+func shellExecuteRunAs(path string, args string) error {
+	shell32 := syscall.NewLazyDLL("shell32.dll")
+	shellExecuteW := shell32.NewProc("ShellExecuteExW")
+
+	// SHELLEXECUTEINFO structure
+	type SHELLEXECUTEINFO struct {
+		cbSize         uint32
+		fMask          uint32
+		hwnd           uintptr
+		lpVerb         *uint16
+		lpFile         *uint16
+		lpParameters   *uint16
+		lpDirectory    *uint16
+		nShow          int32
+		hInstApp       uintptr
+		lpIDList       uintptr
+		lpClass        *uint16
+		hkeyClass      uintptr
+		dwHotKey       uint32
+		hIconOrMonitor uintptr
+		hProcess       uintptr
+	}
+
+	const (
+		SEE_MASK_NOCLOSEPROCESS = 0x00000040
+		SW_SHOWNORMAL           = 1
+	)
+
+	verbPtr, _ := syscall.UTF16PtrFromString("runas")
+	filePtr, _ := syscall.UTF16PtrFromString(path)
+	argsPtr, _ := syscall.UTF16PtrFromString(args)
+
+	sei := SHELLEXECUTEINFO{
+		cbSize:       uint32(unsafe.Sizeof(SHELLEXECUTEINFO{})),
+		fMask:        SEE_MASK_NOCLOSEPROCESS,
+		lpVerb:       verbPtr,
+		lpFile:       filePtr,
+		lpParameters: argsPtr,
+		nShow:        SW_SHOWNORMAL,
+	}
+
+	ret, _, err := shellExecuteW.Call(uintptr(unsafe.Pointer(&sei)))
+	if ret == 0 {
+		return fmt.Errorf("ShellExecuteEx failed: %v", err)
+	}
+
+	return nil
 }
 
