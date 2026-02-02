@@ -79,7 +79,7 @@ jobs:
 
       - name: Compile Installer (Inno Setup)
         run: |
-          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer/printbridge.iss /DMyAppVersion="${{ github.ref_name }}"
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "installer\printbridge.iss" /DMyAppVersion="${{ github.ref_name }}"
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
