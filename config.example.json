@@ -1,0 +1,24 @@
+{
+  "host": "0.0.0.0",
+  "port": 9100,
+  "adapter": "windows",
+  "autostart": {
+    "enabled": true,
+    "install_on_startup": false
+  },
+  "windows": {
+    "printer_name": ""
+  },
+  "usb": {
+    "vendor_id": 0,
+    "product_id": 0
+  },
+  "network": {
+    "address": "192.168.1.100",
+    "port": 9100
+  },
+  "serial": {
+    "port": "/dev/ttyUSB0",
+    "baud_rate": 9600
+  }
+}

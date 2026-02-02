@@ -71,7 +71,7 @@ jobs:
       - name: Stage Other Files
         run: |
           copy tray\iconwin.ico installer\build\windows\
-          copy config.json installer\build\windows\
+          copy config.example.json installer\build\windows\config.json
           copy README.md installer\build\windows\
 
       - name: Install Inno Setup
