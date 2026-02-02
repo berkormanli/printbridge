@@ -20,7 +20,9 @@ import (
 )
 
 // AppVersion is the current version of the application
-const AppVersion = "1.0.8"
+// This can be overridden at build time using:
+// go build -ldflags "-X main.AppVersion=1.2.3"
+var AppVersion = "1.1.0"
 
 var (
 	serviceURL  = "http://localhost:9100"

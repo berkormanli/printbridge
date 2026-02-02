@@ -62,7 +62,8 @@ jobs:
 
       - name: Build Tray App
         run: |
-          go build -ldflags "-H=windowsgui" -o printbridge-tray.exe ./cmd/tray
+          $version = "${{ github.ref_name }}".TrimStart('v')
+          go build -ldflags "-H=windowsgui -X main.AppVersion=$version" -o printbridge-tray.exe ./cmd/tray
           copy printbridge-tray.exe installer\build\windows\
 
       - name: Build Wails App
